@@ -1,0 +1,119 @@
+# 拉取 docker 镜像
+image: node:16.11.1
+
+# 分段
+stages: 
+  # 安装依赖
+  - install
+  # 代码检查
+  - eslint
+  # 编译 
+  - build 
+  # 测试
+  # - deploy_test 
+  # 部署 gitlab-pages
+  - deploy_pages 
+  # 部署生产环境
+  # deploy_production 
+
+# 缓存node_mudules 提高ci运行的速度 
+cache: 
+  key: $CI_BUILD_REF_SLUG
+  # key: $CI_BUILD_REF_NAME 
+  paths:
+    - node_modules/
+    - build/
+ 
+# 构建工作-安装依赖
+install-job:
+  stage: install 
+  # runnder tags
+  tags: 
+    - vue
+  # 可构建分支
+  only:
+    - develop
+    - master
+  script:
+    # 查看node版本
+    - node -v
+    # 查看npm源
+    #- npm config list
+    # 修改cnpm 
+    - npm config set registry https://registry.npm.taobao.org 
+    # 查看npm源
+    - npm info underscore
+    # 安装依赖包
+    - npm install 
+
+# eslint code check 
+eslint-job: 
+  stage: eslint
+  tags:
+    - vue
+  only:
+    - master
+    - develop
+  script:
+    # code format check and auto fix
+    - npm run lint -- --fix
+ 
+build-job:
+  stage: build
+  tags:
+    - vue
+  # 可构建分支
+  only:  
+    - develop
+    - master
+  script:
+    # package.json中scripts中的脚本
+    - npm run build:prod 
+  artifacts: # 构建缓存
+    # 使用当前stage和分支名称作为存档名称
+    name: "$CI_PROJECT_NAMESPACE_$CI_JOB_NAME_$CI_COMMIT_REF_NAME"
+    # 缓存时长(默认30天)
+    expire_in: 7 days 
+    # 路径
+    paths:
+    # 工件指向的目录，这里指整个dist目录
+    - dist
+
+pages-job:
+  stage: deploy_pages
+  tags:
+    - vue
+  only: 
+    - master
+  script:
+    # 查看当前正在构建的项目的目录名称
+    - echo "$CI_PROJECT_NAME"
+    # 建立项目文件夹
+    - mkdir -p $CI_PROJECT_NAME
+    # 将dist文件复制到项目文件夹，npm run build 输出dist 文件夹
+    - cp -r dist/* $CI_PROJECT_NAME/
+    # 将dist输出到public
+    - mv dist public
+    # 将项目文件夹 发布 gitlab-pages服务器 
+    - sshpass -p22 $ROOT_PASSWORD scp -r $CI_PROJECT_ROOT_NAMESPACE $ROOT_USER@$ROOT_HOST:$ROOT_PATH  
+  #缓存
+  artifacts: 
+    paths:
+    # artifact path 一定要在 /public , 这样 GitLab Pages 才能获取
+    - public
+
+# 构建工作 - 部署测试服务器
+#test-job: 
+#  stage: deploy_test 
+#  only:
+#    - develop
+#  script:
+#    - pm2 delete app || true
+#    - pm2 start app.js --name app
+# 构建工作-部署生产服务器 
+#production-job:
+#  tags: 
+#    - vue
+#  stage: deploy_production
+#  script:
+#    - sshpass -p $PASSWORD scp -r ./build $CUSTOM_USERNAME@$CUSTOM_IP:/var/www/html
