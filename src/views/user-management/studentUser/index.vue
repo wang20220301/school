@@ -378,6 +378,8 @@ export default {
     var checkAge2 = (rule, value, callback) => {
       if (!value) {
         return callback(new Error("学号不能为空"));
+      }else{
+        return callback();
       }
     };
     let validatePass4 = (rule, value, callback) => {
@@ -510,13 +512,11 @@ export default {
       });
     },
    createData() {
-      this.$refs["dataForm"].validate((valid) => {
+      this.$refs["dataForm"].validate((val) => {
         // valid判断是否验证通过
-        if (valid) {
+        if (val) {
           // 这里发送请求添加老师数据
-          // 需要使用自定义方法
-          let data = this.$data.temp;
-          getData("Add", this, data);
+          getData("Add", this, this.$data.temp);
           //  判断是否添加成功
           // -1失败，其他成功
           if (this.$data.code == 1) {
@@ -541,8 +541,6 @@ export default {
       this.$refs["dataForm"].validate((valid) => {
         // 验证是否通过
         if (valid) {
-           const tempData = Object.assign({}, this.temp);
-           console.log("yanz")
           getData("update", this, this.temp);
           if (this.$data.code == 1) {
             setTimeout(() => {
@@ -559,7 +557,8 @@ export default {
     },
     // 这里删除数据
     handleDelete(row, index) {
-      getData("del", this, row.user_id);
+      console.log(row,"111")
+      getData("del", this, row.member_id);
       this.$notify({
         title: "成功",
         message: "删除成功",

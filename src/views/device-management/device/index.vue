@@ -3,36 +3,11 @@
     <div class="head">
       <div class="filter-container">
         <el-input
-          placeholder="$t('输入电话或姓名')"
+          v-model="listQuery.keyword"
+          :placeholder="$t('输入电话或姓名')"
           style="width: 200px"
           class="filter-item"
         />
-        <el-select
-          placeholder="$t('请选择年级')"
-          clearable
-          style="width: 140px"
-          class="filter-item"
-        >
-          <el-option
-            v-for="item in importanceOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-        <el-select
-          placeholder="$t('请选择班级')"
-          clearable
-          class="filter-item"
-          style="width: 130px"
-        >
-          <el-option
-            v-for="item in calendarTypeOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
         <el-button
           v-waves
           class="filter-item"
@@ -49,36 +24,10 @@
           icon="el-icon-edit"
           @click="handleCreate"
         >
-          {{ $t("添加老师") }}
-        </el-button>
-        <el-button
-          v-waves
-          :loading="downloadLoading"
-          class="filter-item"
-          type="primary"
-          icon="el-icon-download"
-          @click="handleDownload"
-        >
-          {{ $t("下载老师名册") }}
+          {{ $t("添加设备") }}
         </el-button>
       </div>
-      <div style="margin-left: 20px">
-        <el-upload
-          class="upload-demo"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :before-remove="beforeRemove"
-          multiple
-          :limit="3"
-          :on-exceed="handleExceed"
-          :file-list="fileList"
-        >
-          <el-button type="primary" class="el-icon-upload2"
-            >导入更新老师列表</el-button
-          >
-        </el-upload>
-      </div>
+    
     </div>
 
     <el-table
@@ -101,9 +50,14 @@
           <span>{{ row.class }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('绑定老师')" width="">
+      <el-table-column :label="$t('学号')" width="">
         <template slot-scope="{ row }">
-          <span>{{ row.real_name }}</span>
+          <span>{{ row.sno }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('姓名')" width="" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.class }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('性别')" width="" align="center">
@@ -112,36 +66,38 @@
         </template>
       </el-table-column>
       <el-table-column
-        :label="$t('学科')"
+        v-if="showReviewer"
+        :label="$t('学生卡号')"
         width="110px"
         align="center"
       >
         <template slot-scope="{ row }">
-          <span style="color: red">{{ row.subject }}</span>
+          <span style="color: red">{{ row.card }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('学校邮箱（登陆账号）')" width="">
+      <el-table-column :label="$t('分配规格')" width="">
         <template slot-scope="{ row }">
           <span>
-            {{ row.username }}
+            {{ row.position }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('添加时间')" align="center" width="">
+      <el-table-column :label="$t('入学时间')" align="center" width="">
         <template slot-scope="{ row }">
-          <span>{{ row.create_time }}</span>
+          <span>{{ row.admission_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('电话')" class-name="status-col" width="">
+      <el-table-column :label="$t('毕业时间')" class-name="status-col" width="">
         <template slot-scope="{ row }">
           <span>
-            {{ row.mobile }}
+            {{ row.graduation_time }}
           </span>
         </template>
       </el-table-column>
       <el-table-column
         :label="$t('操作')"
         align="center"
+        width=""
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
@@ -168,72 +124,23 @@
       @pagination="getList"
     />
 
-    <el-dialog title="添加老师" :visible.sync="dialogFormVisible">
+    <el-dialog title="添加设备" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
-        :rules="rules"
+        :rules="rules2"
         :model="temp"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item :label="$t('角色')" prop="value">
+        <el-form-item :label="$t('角色')">
           <el-input v-model="value" disabled />
         </el-form-item>
-        <el-form-item :label="$t('姓名')" prop="real_name">
-          <el-input v-model="temp.real_name" />
+        <el-form-item :label="$t('姓名')" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item :label="$t('电话')" prop="mobile">
-          <el-input v-model="temp.mobile" />
-        </el-form-item>
-        <el-form-item :label="$t('分配柜机')" prop="group_id">
-          <el-select
-            v-model="temp.group_id"
-            class="filter-item"
-            placeholder="选择柜机"
-          >
-            <el-option
-              v-for="item in group_id"
-              :key="item.group_id"
-              :label="item.name"
-              :value="item.group_id"
-            />
-          </el-select>
-        </el-form-item>
-        <div class="now-wrap">
-          <el-form-item :label="$t('年级')" prop="grade">
-            <el-select
-              v-model="temp.grade"
-              class="filter-item"
-              placeholder="选择年级"
-            >
-              <el-option
-                v-for="item in importanceOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <div>
-            <el-form-item :label="$t('班级')" prop="class">
-              <el-select
-                v-model="temp.class"
-                class="filter-item"
-                placeholder="选择班级"
-              >
-                <el-option
-                  v-for="item in calendarTypeOptions"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
-          </div>
-        </div>
-        <div class="now-wrap">
-          <el-form-item :label="$t('性别')" prop="sex">
+  
+          <el-form-item :label="$t('学号')" prop="sex">
             <el-select
               v-model="temp.sex"
               class="filter-item"
@@ -248,29 +155,15 @@
             </el-select>
           </el-form-item>
           <div>
-            <el-form-item :label="$t('学科')" prop="subject">
-              <el-select
-                v-model="temp.subject"
-                class="filter-item"
-                placeholder="选择学科"
-              >
-                <el-option
-                  v-for="item in subject"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
+            <el-form-item :label="$t('规格')" prop="position">
+             <el-input v-model="temp.position" placeholder="规格序号" type="number"></el-input>
             </el-form-item>
-          </div>
         </div>
-
-        <el-form-item :label="$t('账号')" prop="username">
-          <el-input v-model="temp.username" />
+        
+        <el-form-item :label="$t('学号')" prop="sno">
+          <el-input v-model="temp.sno"  type="number"/>
         </el-form-item>
-        <el-form-item :label="$t('密码')" prop="password">
-          <el-input v-model="temp.password" />
-        </el-form-item>
+       
       </el-form>
       <!-- 选择，确定或取消 -->
       <div slot="footer" class="dialog-footer">
@@ -285,7 +178,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <div class="block" v-if="block">
+    <div class="block">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -337,7 +230,6 @@ export default {
       return calendarTypeKeyValue[type];
     },
   },
-  
   data() {
     // 验证用户名不能为空,用户名不能超过6个字符
     let validatePass = (rule, value, callback) => {
@@ -350,7 +242,7 @@ export default {
       }
     };
     let validatePass5 = (rule, value, callback) => {
-      console.log(value);
+     
       if (!value) {
         return callback(new Error("请选择柜机"));
       } else {
@@ -358,7 +250,7 @@ export default {
       }
     };
     let validatePass6 = (rule, value, callback) => {
-      console.log(value);
+     
       if (!value) {
         return callback(new Error("请选择年级"));
       } else {
@@ -366,7 +258,7 @@ export default {
       }
     };
     let validatePass7 = (rule, value, callback) => {
-      console.log(value);
+     
       if (!value) {
         return callback(new Error("请选择班级"));
       } else {
@@ -374,7 +266,7 @@ export default {
       }
     };
     let validatePass8 = (rule, value, callback) => {
-      console.log(value);
+     
       if (!value) {
         return callback(new Error("请选择性别"));
       } else {
@@ -382,9 +274,17 @@ export default {
       }
     };
     let validatePass9 = (rule, value, callback) => {
-      console.log(value);
+    
       if (!value) {
         return callback(new Error("请选择学科"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass10= (rule, value, callback) => {
+      
+      if (!value) {
+        return callback(new Error("日期不能为空"));
       } else {
         return callback();
       }
@@ -392,27 +292,21 @@ export default {
     let validatePass2 = (rule, value, callback) => {
       let reg = /^[\u4E00-\u9FA5]{2,4}$/;
       if (!value) {
-        return callback(new Error("账号不能为空"));
-      } else if (value.length > 5) {
-        return callback(new Error("账号最多不能超过6个字符"));
+        return callback(new Error("卡号不能为空"));
+      } else if (value.length > 30) {
+        return callback(new Error("账号最多不能超过30个字符"));
       } else if (reg.test(value)) {
-        return callback(new Error("账号最多不能为中文"));
+        return callback(new Error("账号不能为中文"));
       } else {
         return callback();
       }
     };
     var checkAge2 = (rule, value, callback) => {
       if (!value) {
-        return callback(new Error("手机号不能为空"));
+        return callback(new Error("学号不能为空"));
+      }else{
+        return callback();
       }
-      let pattern = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
-      setTimeout(() => {
-        if (!pattern.test(value)) {
-          callback(new Error("请输入正确的手机号"));
-        } else {
-          callback();
-        }
-      }, 1000);
     };
     let validatePass4 = (rule, value, callback) => {
       let reg = /^[\u4E00-\u9FA5]{2,4}$/;
@@ -427,11 +321,11 @@ export default {
       }
     };
     return {
-      value: "老师",
+      value: "学生",
+      value1:"",
       tableKey: 0,
       subject: "",
       code: "",
-      block:true,
       currentPage4: 1,
       paging: {},
       // 模拟数据
@@ -456,17 +350,17 @@ export default {
       showReviewer: false,
       // 添加老师
       temp: {
-        real_name: "",
+        name: "",
         grade: "",
         class: "",
         importance: 1,
-        mobile: "",
         remark: "",
-        sex: "",
-        subjext: "",
-        username: "",
+        sex:"",
+        sno:"",
+        card:"",
+        time:"",
+        position:"",
         password: "",
-        group_id: "",
       },
       dialogFormVisible: false,
       dialogStatus: "",
@@ -476,31 +370,30 @@ export default {
       },
       dialogPvVisible: false,
       pvData: [],
-      rules: {
-        real_name: [{ validator: validatePass, trigger: "blur" }],
-        mobile: [{ validator: checkAge2, trigger: "blur" }],
-        username: [{ validator: validatePass2, trigger: "blur" }],
+      rules2: {
+        name: [{ validator: validatePass, trigger: "blur" }],
+        sno: [{ validator: checkAge2, trigger: "blur" }],
+        card: [{ validator: validatePass2, trigger: "blur" }],
         password: [{ validator: validatePass4, trigger: "blur" }],
         group_id: [{ validator: validatePass5, trigger: "blur" }],
         grade: [{ validator: validatePass7, trigger: "blur" }],
         class: [{ validator: validatePass6, trigger: "blur" }],
         sex: [{ validator: validatePass8, trigger: "blur" }],
-        subject: [{ validator: validatePass9, trigger: "blur" }],
+        position: [{ validator: validatePass9, trigger: "blur" }],
+        time: [{ validator: validatePass10, trigger: "blur" }],
       },
       downloadLoading: false,
     };
   },
   created() {
     // 进入页面获取数据
-    getData("List", this,1);
+    getData("List", this, 1);
     getData("Class", this);
-    getData("Id", this);
+    // getData("Id", this);
   },
   methods: {
     //  点击搜索获取表单数据,发送请求搜索
-    
     handleFilter() {
-        this.$data.block=false
       getData("search", this, this.$data.listQuery);
     },
     handleModifyStatus(row, status) {
@@ -544,16 +437,12 @@ export default {
         this.$refs["dataForm"].clearValidate();
       });
     },
-    createData() {
-      this.$refs["dataForm"].validate((valid) => {
+   createData() {
+      this.$refs["dataForm"].validate((val) => {
         // valid判断是否验证通过
-
-        if (valid) {
+        if (val) {
           // 这里发送请求添加老师数据
-          // 需要使用自定义方法
-          console.log("1211221212121")
-          let data = this.$data.temp;
-          getData("Add", this, data);
+          getData("Add", this, this.$data.temp);
           //  判断是否添加成功
           // -1失败，其他成功
           if (this.$data.code == 1) {
@@ -574,17 +463,15 @@ export default {
       this.dialogStatus = "update";
       this.dialogFormVisible = true;
     },
-    // 在这里更新数据
     updateData() {
       this.$refs["dataForm"].validate((valid) => {
         // 验证是否通过
         if (valid) {
-          // const tempData = Object.assign({}, this.temp);
           getData("update", this, this.temp);
           if (this.$data.code == 1) {
             setTimeout(() => {
               // 刷新页面
-              getData("List", this);
+              getData("ListMsg", this);
               this.open2("修改成功");
               this.$data.dialogFormVisible = false;
             }, 100);
@@ -596,7 +483,8 @@ export default {
     },
     // 这里删除数据
     handleDelete(row, index) {
-      getData("del", this, row.user_id);
+      console.log(row,"111")
+      getData("del", this, row.member_id);
       this.$notify({
         title: "成功",
         message: "删除成功",
@@ -677,5 +565,11 @@ export default {
 }
 .block {
   padding-top: 20px;
+}
+.timeStyle {
+  /* background: red; */
+  width: 80px;
+  padding-left: 50px;
+  padding-bottom: 20px;
 }
 </style>

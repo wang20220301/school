@@ -6,8 +6,8 @@ import request from '@/utils/request'
   let obj={
       add:"/add",
       list:"/student_list",
-      updata:"/update_users",
-      del:"/del_teacher",
+      updata:"/update_students",
+      del:"/del_students",
       search:"/search_teachers",
       loa:"/teacher_export",
       import:"/teacher_import",
