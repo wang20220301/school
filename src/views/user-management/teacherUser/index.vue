@@ -3,14 +3,12 @@
     <div class="head">
       <div class="filter-container">
         <el-input
-          v-model="listQuery.keyword"
-          :placeholder="$t('输入电话或姓名')"
+          placeholder="$t('输入电话或姓名')"
           style="width: 200px"
           class="filter-item"
         />
         <el-select
-          v-model="listQuery.grade"
-          :placeholder="$t('请选择年级')"
+          placeholder="$t('请选择年级')"
           clearable
           style="width: 140px"
           class="filter-item"
@@ -23,8 +21,7 @@
           />
         </el-select>
         <el-select
-          v-model="listQuery.class"
-          :placeholder="$t('请选择班级')"
+          placeholder="$t('请选择班级')"
           clearable
           class="filter-item"
           style="width: 130px"
@@ -115,7 +112,6 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-if="showReviewer"
         :label="$t('学科')"
         width="110px"
         align="center"
@@ -146,7 +142,6 @@
       <el-table-column
         :label="$t('操作')"
         align="center"
-        width=""
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
@@ -290,7 +285,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <div class="block">
+    <div class="block" v-if="block">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -342,6 +337,7 @@ export default {
       return calendarTypeKeyValue[type];
     },
   },
+  
   data() {
     // 验证用户名不能为空,用户名不能超过6个字符
     let validatePass = (rule, value, callback) => {
@@ -435,6 +431,7 @@ export default {
       tableKey: 0,
       subject: "",
       code: "",
+      block:true,
       currentPage4: 1,
       paging: {},
       // 模拟数据
@@ -497,11 +494,13 @@ export default {
     // 进入页面获取数据
     getData("List", this,1);
     getData("Class", this);
-    getData("Id", this);
+    // getData("Id", this);
   },
   methods: {
     //  点击搜索获取表单数据,发送请求搜索
+    
     handleFilter() {
+        this.$data.block=false
       getData("search", this, this.$data.listQuery);
     },
     handleModifyStatus(row, status) {
@@ -559,7 +558,7 @@ export default {
           if (this.$data.code == 1) {
             setTimeout(() => {
               // 刷新页面
-              getData("ListMsg", this);
+              getData("List", this);
               this.open2("添加成功");
               this.$data.dialogFormVisible = false;
             }, 100);
@@ -584,7 +583,7 @@ export default {
           if (this.$data.code == 1) {
             setTimeout(() => {
               // 刷新页面
-              getData("ListMsg", this);
+              getData("List", this);
               this.open2("修改成功");
               this.$data.dialogFormVisible = false;
             }, 100);

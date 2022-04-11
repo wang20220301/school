@@ -1,71 +1,59 @@
 <template>
   <div class="app-container">
     <div class="head">
-       <div class="filter-container">
-      <el-input
-        v-model="listQuery.title"
-        :placeholder="$t('输入电话或姓名')"
-        style="width: 200px"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <!-- <el-select
-        v-model="listQuery.importance"
-        :placeholder="$t('请选择年级')"
-        clearable
-        style="width: 140px"
-        class="filter-item"
-      >
-        <el-option
-          v-for="item in importanceOptions"
-          :key="item"
-          :label="item"
-          :value="item"
+      <div class="filter-container">
+        <el-input
+          v-model="listQuery.keyword"
+          :placeholder="$t('输入电话或姓名')"
+          style="width: 200px"
+          class="filter-item"
         />
-      </el-select>
-      <el-select
-        v-model="listQuery.type"
-        :placeholder="$t('请选择班级')"
-        clearable
-        class="filter-item"
-        style="width: 130px"
-      >
-        <el-option
-          v-for="item in calendarTypeOptions"
-          :key="item.key"
-          :label="item.display_name + '(' + item.key + ')'"
-          :value="item.key"
-        />
-      </el-select> -->
-      <el-button
-        v-waves
-        class="filter-item"
-        type="primary"
-        icon="el-icon-search"
-        @click="handleFilter"
-      >
-        {{ $t("搜索") }}
-      </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >
-        {{ $t("添加学生") }}
-      </el-button>
-      <!-- <el-button
-        v-waves
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleDownload"
-      >
-        {{ $t("下载老师名册") }}
-      </el-button> -->
-    </div>
+        <el-button
+          v-waves
+          class="filter-item"
+          type="primary"
+          icon="el-icon-search"
+          @click="handleFilter"
+        >
+          {{ $t("搜索") }}
+        </el-button>
+        <el-button
+          class="filter-item"
+          style="margin-left: 10px"
+          type="primary"
+          icon="el-icon-edit"
+          @click="handleCreate"
+        >
+          {{ $t("添加学生") }}
+        </el-button>
+        <el-button
+          v-waves
+          :loading="downloadLoading"
+          class="filter-item"
+          type="primary"
+          icon="el-icon-download"
+          @click="handleDownload"
+        >
+          {{ $t("下载学生名册") }}
+        </el-button>
+      </div>
+      <div style="margin-left: 20px">
+        <el-upload
+          class="upload-demo"
+          action="https://jsonplaceholder.typicode.com/posts/"
+          :on-preview="handlePreview"
+          :on-remove="handleRemove"
+          :before-remove="beforeRemove"
+          multiple
+          :limit="3"
+          :on-exceed="handleExceed"
+          :file-list="fileList"
+        >
+          <el-button type="primary" class="el-icon-upload2"
+            >导入更新学生列表</el-button
+          >
+        </el-upload>
+      </div>
     </div>
 
     <el-table
@@ -76,77 +64,60 @@
       fit
       highlight-current-row
       style="width: 100%"
-      :max-height="currentHeight"
       @sort-change="sortChange"
     >
-      <el-table-column :label="$t('班级')" width="" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.timestamp | parseTime("{y}-{m}-{d} {h}:{i}") }}</span>
+      <el-table-column :label="$t('年级')" width="" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.grade }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('班级')" width="" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.timestamp | parseTime("{y}-{m}-{d} {h}:{i}") }}</span>
+          <span>{{ row.class }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('绑定老师')" width="">
+      <el-table-column :label="$t('学号')" width="">
         <template slot-scope="{ row }">
-          <span class="link-type" @click="handleUpdate(row)">{{
-            row.title
-          }}</span>
-          <el-tag>{{ row.type | typeFilter }}</el-tag>
+          <span>{{ row.sno }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('姓名')" width="" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.class }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('性别')" width="" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.author }}</span>
+          <span>{{ row.sex }}</span>
         </template>
       </el-table-column>
       <el-table-column
         v-if="showReviewer"
-        :label="$t('学科')"
+        :label="$t('学生卡号')"
         width="110px"
         align="center"
       >
         <template slot-scope="{ row }">
-          <span style="color: red">{{ row.reviewer }}</span>
+          <span style="color: red">{{ row.card }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('学校邮箱（登陆账号）')" width="">
+      <el-table-column :label="$t('分配规格')" width="">
         <template slot-scope="{ row }">
-          <svg-icon
-            v-for="n in +row.importance"
-            :key="n"
-            icon-class="star"
-            class="meta-item__icon"
-          />
+          <span>
+            {{ row.position }}
+          </span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('登陆密码')" align="center" width="">
+      <el-table-column :label="$t('入学时间')" align="center" width="">
         <template slot-scope="{ row }">
-          <span
-            v-if="row.pageviews"
-            class="link-type"
-            @click="handleFetchPv(row.pageviews)"
-            >{{ row.pageviews }}</span
-          >
-          <span v-else>0</span>
+          <span>{{ row.admission_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('添加时间')" align="center" width="">
+      <el-table-column :label="$t('毕业时间')" class-name="status-col" width="">
         <template slot-scope="{ row }">
-          <span
-            v-if="row.pageviews"
-            class="link-type"
-            @click="handleFetchPv(row.pageviews)"
-            >{{ row.pageviews }}</span
-          >
-          <span v-else>0</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('电话')" class-name="status-col" width="">
-        <template slot-scope="{ row }">
-          <el-tag :type="row.status | statusFilter"> </el-tag>
+          <span>
+            {{ row.graduation_time }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column
@@ -179,44 +150,62 @@
       @pagination="getList"
     />
 
-    <el-dialog title="添加老师" :visible.sync="dialogFormVisible">
+    <el-dialog title="添加学生" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
-        :rules="rules"
+        :rules="rules2"
         :model="temp"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item :label="$t('角色')" prop="type">
-          <el-select
-            v-model="temp.type"
-            class="filter-item"
-            placeholder="Please select"
-          >
-            <el-option
-              v-for="item in calendarTypeOptions"
-              :key="item.key"
-              :label="item.display_name"
-              :value="item.key"
-            />
-          </el-select>
+        <el-form-item :label="$t('角色')">
+          <el-input v-model="value" disabled />
         </el-form-item>
-        <el-form-item :label="$t('姓名')" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item :label="$t('手机号')" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item :label="$t('姓名')" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
         <div class="now-wrap">
-          <el-form-item :label="$t('年级')">
+          <el-form-item :label="$t('年级')" prop="grade">
             <el-select
-              v-model="temp.status"
+              v-model="temp.grade"
               class="filter-item"
-              placeholder="Please select"
+              placeholder="选择年级"
             >
               <el-option
-                v-for="item in statusOptions"
+                v-for="item in importanceOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <div>
+            <el-form-item :label="$t('班级')" prop="class">
+              <el-select
+                v-model="temp.class"
+                class="filter-item"
+                placeholder="选择班级"
+              >
+                <el-option
+                  v-for="item in calendarTypeOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+        </div>
+        <div class="now-wrap">
+          <el-form-item :label="$t('学号')" prop="sex">
+            <el-select
+              v-model="temp.sex"
+              class="filter-item"
+              placeholder="选择性别"
+            >
+              <el-option
+                v-for="item in sex"
                 :key="item"
                 :label="item"
                 :value="item"
@@ -224,86 +213,66 @@
             </el-select>
           </el-form-item>
           <div>
-            <el-form-item :label="$t('班级')">
-              <el-select
-                v-model="temp.status"
-                class="filter-item"
-                placeholder="Please select"
-              >
-                <el-option
-                  v-for="item in statusOptions"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                />
-              </el-select>
+            <el-form-item :label="$t('规格')" prop="position">
+             <el-input v-model="temp.position" placeholder="规格序号" type="number"></el-input>
             </el-form-item>
           </div>
         </div>
-        <div class="now-wrap">
-          <el-form-item :label="$t('性别')">
-            <el-select
-              v-model="temp.status"
-              class="filter-item"
-              placeholder="Please select"
-            >
-              <el-option
-                v-for="item in statusOptions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-          </el-form-item>
-          <div>
-            <el-form-item :label="$t('学科')">
-              <el-select
-                v-model="temp.status"
-                class="filter-item"
-                placeholder="Please select"
-              >
-                <el-option
-                  v-for="item in statusOptions"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-                />
-              </el-select>
-            </el-form-item>
-          </div>
-        </div>
-        <el-form-item :label="$t('账号')" prop="title">
-          <el-input v-model="temp.title" />
+        
+        <el-form-item :label="$t('学号')" prop="sno">
+          <el-input v-model="temp.sno"  type="number"/>
         </el-form-item>
-        <el-form-item :label="$t('密码')" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item :label="$t('卡号')" prop="card">
+          <el-input v-model="temp.card" type="number" />
+        </el-form-item>
+          <el-form-item :label="$t('日期')" prop="time">
+         
+            <el-date-picker
+              v-model="temp.time"
+              type="daterange"
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            >
+            </el-date-picker>
+          
         </el-form-item>
       </el-form>
       <!-- 选择，确定或取消 -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          {{ $t("table.cancel") }}
+          {{ $t("取消") }}
         </el-button>
         <el-button
           type="primary"
           @click="dialogStatus === 'create' ? createData() : updateData()"
         >
-          {{ $t("table.confirm") }}
+          {{ $t("确定") }}
         </el-button>
       </div>
     </el-dialog>
+    <div class="block">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage4"
+        :page-sizes="[13]"
+        :page-size="100"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="paging.total"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
-import {
-  fetchPv,
-  createArticle,
-  updateArticle
-} from "@/api/article";
+import { fetchPv } from "@/api/article";
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
+import { getData } from "./Controller";
 // 这里选择班级
 const calendarTypeOptions = [
   { key: "CN", display_name: "一班" },
@@ -313,10 +282,10 @@ const calendarTypeOptions = [
 ];
 
 // arr to obj, such as { CN : "China", US : "USA" }
-// const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-//   acc[cur.key] = cur.display_name;
-//   return acc;
-// }, {});
+const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
+  acc[cur.key] = cur.display_name;
+  return acc;
+}, {});
 
 export default {
   name: "SchoolUser",
@@ -336,272 +305,134 @@ export default {
     },
   },
   data() {
+    // 验证用户名不能为空,用户名不能超过6个字符
+    let validatePass = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("姓名不能为空"));
+      } else if (value.length > 5) {
+        return callback(new Error("姓名最多不能超过6个字符"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass5 = (rule, value, callback) => {
+     
+      if (!value) {
+        return callback(new Error("请选择柜机"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass6 = (rule, value, callback) => {
+     
+      if (!value) {
+        return callback(new Error("请选择年级"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass7 = (rule, value, callback) => {
+     
+      if (!value) {
+        return callback(new Error("请选择班级"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass8 = (rule, value, callback) => {
+     
+      if (!value) {
+        return callback(new Error("请选择性别"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass9 = (rule, value, callback) => {
+    
+      if (!value) {
+        return callback(new Error("请选择学科"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass10= (rule, value, callback) => {
+      
+      if (!value) {
+        return callback(new Error("日期不能为空"));
+      } else {
+        return callback();
+      }
+    };
+    let validatePass2 = (rule, value, callback) => {
+      let reg = /^[\u4E00-\u9FA5]{2,4}$/;
+      if (!value) {
+        return callback(new Error("卡号不能为空"));
+      } else if (value.length > 30) {
+        return callback(new Error("账号最多不能超过30个字符"));
+      } else if (reg.test(value)) {
+        return callback(new Error("账号不能为中文"));
+      } else {
+        return callback();
+      }
+    };
+    var checkAge2 = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error("学号不能为空"));
+      }
+    };
+    let validatePass4 = (rule, value, callback) => {
+      let reg = /^[\u4E00-\u9FA5]{2,4}$/;
+      if (!value) {
+        return callback(new Error("密码不能为空"));
+      } else if (reg.test(value)) {
+        return callback(new Error("密码不能为中文"));
+      } else if (value.length > 10) {
+        return callback(new Error("密码不能超过10个字符"));
+      } else {
+        return callback();
+      }
+    };
     return {
+      value: "学生",
+      value1:"",
       tableKey: 0,
+      subject: "",
+      code: "",
+      currentPage4: 1,
+      paging: {},
       // 模拟数据
-      list: [
-        {
-          id: 1,
-          timestamp: 588136958915,
-          author: "Ronald",
-          reviewer: "Elizabeth",
-          title:
-            "Ctbvmppmlf Xnpoa Opmv Ebgjek Bfkzjoye Mfmyvdlbgr Rezb Dhjujdnxyr Cgj Vjdwg",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 86.78,
-          importance: 2,
-          type: "US",
-          status: "published",
-          display_time: "1975-03-28 11:01:31",
-          comment_disabled: true,
-          pageviews: 3685,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Ctbvmppmlf Xnpoa Opmv Ebgjek Bfkzjoye Mfmyvdlbgr Rezb Dhjujdnxyr Cgj Vjdwg",
-        },
-        {
-          id: 2,
-          timestamp: 450579301723,
-          author: "Betty",
-          reviewer: "Deborah",
-          title: "Orwc Nqkrazt Udmppo Hryuhvy Dky Mqbuujw Kqdectxdg",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 76.18,
-          importance: 2,
-          type: "US",
-          status: "draft",
-          display_time: "1982-04-15 18:17:41",
-          comment_disabled: true,
-          pageviews: 2068,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle: "Orwc Nqkrazt Udmppo Hryuhvy Dky Mqbuujw Kqdectxdg",
-        },
-        {
-          id: 3,
-          timestamp: 1552081935806,
-          author: "Jennifer",
-          reviewer: "Sarah",
-          title: "Goyrqbc Ydvhzbkn Lhj Rndellrcbo Zuctnil",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 86.22,
-          importance: 2,
-          type: "EU",
-          status: "published",
-          display_time: "1991-06-23 03:52:00",
-          comment_disabled: true,
-          pageviews: 3473,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle: "Goyrqbc Ydvhzbkn Lhj Rndellrcbo Zuctnil",
-        },
-        {
-          id: 4,
-          timestamp: 155523994006,
-          author: "Cynthia",
-          reviewer: "Sarah",
-          title:
-            "Svwibwldxr Mrmahxeub Kncepb Lxgbomwn Jfuavlvn Aut Myy Gokoqvolpq Mdmfdr Opwiwk",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 53.58,
-          importance: 2,
-          type: "JP",
-          status: "published",
-          display_time: "1987-02-05 11:56:36",
-          comment_disabled: true,
-          pageviews: 774,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Svwibwldxr Mrmahxeub Kncepb Lxgbomwn Jfuavlvn Aut Myy Gokoqvolpq Mdmfdr Opwiwk",
-        },
-        {
-          id: 5,
-          timestamp: 474696722757,
-          author: "Joseph",
-          reviewer: "Mary",
-          title: "Owsidejiso Hzcf Mhclsc Duiv Kcdqclsc",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 59.19,
-          importance: 2,
-          type: "JP",
-          status: "published",
-          display_time: "1980-10-25 21:06:46",
-          comment_disabled: true,
-          pageviews: 3646,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle: "Owsidejiso Hzcf Mhclsc Duiv Kcdqclsc",
-        },
-        {
-          id: 6,
-          timestamp: 765704921734,
-          author: "Michelle",
-          reviewer: "Elizabeth",
-          title:
-            "Hdhbfscls Fulsow Jrsuvsyx Cddchvtywv Xpij Rlrgdomo Nchvnt Pgxuw Otcbhxuew",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 74.32,
-          importance: 2,
-          type: "CN",
-          status: "published",
-          display_time: "1971-12-30 02:01:02",
-          comment_disabled: true,
-          pageviews: 4300,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Hdhbfscls Fulsow Jrsuvsyx Cddchvtywv Xpij Rlrgdomo Nchvnt Pgxuw Otcbhxuew",
-        },
-        {
-          id: 7,
-          timestamp: 1387853316487,
-          author: "Jeffrey",
-          reviewer: "Jennifer",
-          title:
-            "Nelvirt Wljlff Qbdowetnh Mszb Uqbyeix Lkqrtkwxt Ujdi Xyednaflt",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 60.26,
-          importance: 3,
-          type: "US",
-          status: "published",
-          display_time: "1999-04-26 12:23:18",
-          comment_disabled: true,
-          pageviews: 3651,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Nelvirt Wljlff Qbdowetnh Mszb Uqbyeix Lkqrtkwxt Ujdi Xyednaflt",
-        },
-        {
-          id: 8,
-          timestamp: 436393361046,
-          author: "George",
-          reviewer: "Susan",
-          title:
-            "Hbrelh Ymtdxcz Echmm Yiygleghc Rjoaunsb Grgpyohjt Vytv Hukjtdihcm Wsrg",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 67.66,
-          importance: 2,
-          type: "JP",
-          status: "published",
-          display_time: "2008-05-08 16:11:13",
-          comment_disabled: true,
-          pageviews: 4910,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Hbrelh Ymtdxcz Echmm Yiygleghc Rjoaunsb Grgpyohjt Vytv Hukjtdihcm Wsrg",
-        },
-        {
-          id: 9,
-          timestamp: 728429411293,
-          author: "Karen",
-          reviewer: "Elizabeth",
-          title: "Eesmglefa Truv Qlury Clsp Bfxidgdac Imlgpdwp Gtkxwsawmb",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 31.74,
-          importance: 1,
-          type: "JP",
-          status: "draft",
-          display_time: "1997-08-31 17:01:38",
-          comment_disabled: true,
-          pageviews: 3525,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle:
-            "Eesmglefa Truv Qlury Clsp Bfxidgdac Imlgpdwp Gtkxwsawmb",
-        },
-        {
-          id: 10,
-          timestamp: 1111425074833,
-          author: "Betty",
-          reviewer: "Charles",
-          title: "Ygy Pfycs Thv Bpcjpzugc Laixumwc Ytujve Mopl Tmzbf",
-          content_short: "mock data",
-          content:
-            '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>',
-          forecast: 30.38,
-          importance: 3,
-          type: "US",
-          status: "draft",
-          display_time: "1997-09-30 07:45:40",
-          comment_disabled: true,
-          pageviews: 2811,
-          image_uri:
-            "https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3",
-          platforms: ["a-platform"],
-          edit: false,
-          originalTitle: "Ygy Pfycs Thv Bpcjpzugc Laixumwc Ytujve Mopl Tmzbf",
-        },
-      ],
+      list: [],
       total: 0,
-      total2: 0,
-      listLoading: true,
+      listLoading: false,
       // from表单或输入框默认显示值
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: "+id",
+        keyword: "",
+        grade: "",
+        class: "",
       },
       currentHeight: 500,
       // 选择年级
-      importanceOptions: ["一年级", "二年级", "三年级", "四年级", "五年级"],
+      importanceOptions: [],
       calendarTypeOptions,
       sortOptions: [
         { label: "ID Ascending", key: "+id" },
         { label: "ID Descending", key: "-id" },
       ],
-      statusOptions: ["published", "draft", "deleted"],
+      sex: ["男", "女"],
       showReviewer: false,
+      // 添加老师
       temp: {
-        id: undefined,
+        name: "",
+        grade: "",
+        class: "",
         importance: 1,
         remark: "",
-        timestamp: new Date(),
-        title: "",
-        type: "",
-        status: "published",
+        sex:"",
+        sno:"",
+        card:"",
+        time:"",
+        position:"",
+        password: "",
       },
       dialogFormVisible: false,
       dialogStatus: "",
@@ -611,46 +442,31 @@ export default {
       },
       dialogPvVisible: false,
       pvData: [],
-      rules: {
-        type: [
-          { required: true, message: "type is required", trigger: "change" },
-        ],
-        timestamp: [
-          {
-            type: "date",
-            required: true,
-            message: "timestamp is required",
-            trigger: "change",
-          },
-        ],
-        title: [
-          { required: true, message: "title is required", trigger: "blur" },
-        ],
+      rules2: {
+        name: [{ validator: validatePass, trigger: "blur" }],
+        sno: [{ validator: checkAge2, trigger: "blur" }],
+        card: [{ validator: validatePass2, trigger: "blur" }],
+        password: [{ validator: validatePass4, trigger: "blur" }],
+        group_id: [{ validator: validatePass5, trigger: "blur" }],
+        grade: [{ validator: validatePass7, trigger: "blur" }],
+        class: [{ validator: validatePass6, trigger: "blur" }],
+        sex: [{ validator: validatePass8, trigger: "blur" }],
+        position: [{ validator: validatePass9, trigger: "blur" }],
+        time: [{ validator: validatePass10, trigger: "blur" }],
       },
       downloadLoading: false,
     };
   },
   created() {
-    this.getList();
+    // 进入页面获取数据
+    getData("List", this, 1);
+    getData("Class", this);
+    // getData("Id", this);
   },
   methods: {
-    // 进入页面获取数据
-    getList() {
-      // 请求数据显示loading图标
-      this.listLoading = false;
-      // fetchList(this.listQuery).then(response => {
-      //   this.list = response.data.items
-      //   this.total = response.data.total
-      //   // 请求完成隐藏loding图标
-      //   // Just to simulate the time of the request
-      //   setTimeout(() => {
-      //     this.listLoading = false
-      //   }, 1.5 * 1000)
-      // })
-    },
+    //  点击搜索获取表单数据,发送请求搜索
     handleFilter() {
-      this.listQuery.page = 1;
-      this.getList();
+      getData("search", this, this.$data.listQuery);
     },
     handleModifyStatus(row, status) {
       this.$message({
@@ -658,6 +474,13 @@ export default {
         type: "success",
       });
       row.status = status;
+    },
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      // 获取分页数据
+      getData("List", this, val);
     },
     sortChange(data) {
       const { prop, order } = data;
@@ -676,12 +499,6 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        importance: 1,
-        remark: "",
-        timestamp: new Date(),
-        title: "",
-        status: "published",
-        type: "",
       };
     },
     handleCreate() {
@@ -692,53 +509,57 @@ export default {
         this.$refs["dataForm"].clearValidate();
       });
     },
-    createData() {
+   createData() {
       this.$refs["dataForm"].validate((valid) => {
+        // valid判断是否验证通过
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024; // mock a id
-          this.temp.author = "vue-element-admin";
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp);
-            this.dialogFormVisible = false;
-            this.$notify({
-              title: "成功",
-              message: "创建成功",
-              type: "success",
-              duration: 2000,
-            });
-          });
+          // 这里发送请求添加老师数据
+          // 需要使用自定义方法
+          let data = this.$data.temp;
+          getData("Add", this, data);
+          //  判断是否添加成功
+          // -1失败，其他成功
+          if (this.$data.code == 1) {
+            setTimeout(() => {
+              // 刷新页面
+              getData("List", this);
+              this.open2("添加成功");
+              this.$data.dialogFormVisible = false;
+            }, 100);
+          } else {
+            this.open("账号已存在");
+          }
         }
       });
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row); // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp);
+      this.temp = Object.assign({}, row);
       this.dialogStatus = "update";
       this.dialogFormVisible = true;
-      this.$nextTick(() => {
-        this.$refs["dataForm"].clearValidate();
-      });
     },
     updateData() {
       this.$refs["dataForm"].validate((valid) => {
+        // 验证是否通过
         if (valid) {
-          const tempData = Object.assign({}, this.temp);
-          tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            const index = this.list.findIndex((v) => v.id === this.temp.id);
-            this.list.splice(index, 1, this.temp);
-            this.dialogFormVisible = false;
-            this.$notify({
-              title: "成功",
-              message: "更新成功",
-              type: "success",
-              duration: 2000,
-            });
-          });
+           const tempData = Object.assign({}, this.temp);
+           console.log("yanz")
+          getData("update", this, this.temp);
+          if (this.$data.code == 1) {
+            setTimeout(() => {
+              // 刷新页面
+              getData("ListMsg", this);
+              this.open2("修改成功");
+              this.$data.dialogFormVisible = false;
+            }, 100);
+          } else {
+            this.open("修改失败");
+          }
         }
       });
     },
+    // 这里删除数据
     handleDelete(row, index) {
+      getData("del", this, row.user_id);
       this.$notify({
         title: "成功",
         message: "删除成功",
@@ -788,6 +609,18 @@ export default {
       const sort = this.listQuery.sort;
       return sort === `+${key}` ? "ascending" : "descending";
     },
+    open2(value) {
+      this.$message({
+        message: value,
+        type: "success",
+      });
+    },
+    open(value) {
+      this.$message({
+        message: value,
+        type: "warning",
+      });
+    },
   },
 };
 </script>
@@ -798,12 +631,20 @@ export default {
   align-items: center;
   margin: auto;
   justify-content: center;
-  /* background: red; */
 }
 .now-wrap div {
   margin-left: 10px;
 }
-.head{
+.head {
   display: flex;
+}
+.block {
+  padding-top: 20px;
+}
+.timeStyle {
+  /* background: red; */
+  width: 80px;
+  padding-left: 50px;
+  padding-bottom: 20px;
 }
 </style>
