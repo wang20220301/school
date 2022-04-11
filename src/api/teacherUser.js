@@ -12,7 +12,8 @@ import request from '@/utils/request'
       loa:"/teacher_export",
       import:"/teacher_import",
       class:"/show_class",
-      load:"/teacher_export"
+      load:"/teacher_export",
+      id:"/all_monitor"
   }
   let url=`/api/teacher${obj[type]}`
   console.log(url,"值为")

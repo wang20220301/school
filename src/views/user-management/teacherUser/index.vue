@@ -3,14 +3,13 @@
     <div class="head">
       <div class="filter-container">
         <el-input
-          v-model="listQuery.title"
+          v-model="listQuery.keyword"
           :placeholder="$t('输入电话或姓名')"
           style="width: 200px"
           class="filter-item"
-          @keyup.enter.native="handleFilter"
         />
         <el-select
-          v-model="listQuery.importance"
+          v-model="listQuery.grade"
           :placeholder="$t('请选择年级')"
           clearable
           style="width: 140px"
@@ -24,7 +23,7 @@
           />
         </el-select>
         <el-select
-          v-model="listQuery.type"
+          v-model="listQuery.class"
           :placeholder="$t('请选择班级')"
           clearable
           class="filter-item"
@@ -93,7 +92,6 @@
       fit
       highlight-current-row
       style="width: 100%"
-      :max-height="currentHeight"
       @sort-change="sortChange"
     >
       <el-table-column :label="$t('年级')" width="" align="center">
@@ -193,17 +191,17 @@
         <el-form-item :label="$t('电话')" prop="mobile">
           <el-input v-model="temp.mobile" />
         </el-form-item>
-        <el-form-item :label="$t('分配柜机')" prop="subjext">
+        <el-form-item :label="$t('分配柜机')" prop="group_id">
           <el-select
-            v-model="temp.subjext"
+            v-model="temp.group_id"
             class="filter-item"
             placeholder="选择柜机"
           >
             <el-option
-              v-for="item in subject"
-              :key="item.id"
+              v-for="item in group_id"
+              :key="item.group_id"
               :label="item.name"
-              :value="item.id"
+              :value="item.group_id"
             />
           </el-select>
         </el-form-item>
@@ -255,7 +253,7 @@
             </el-select>
           </el-form-item>
           <div>
-            <el-form-item :label="$t('学科')" prop="subjext">
+            <el-form-item :label="$t('学科')" prop="subject">
               <el-select
                 v-model="temp.subject"
                 class="filter-item"
@@ -292,15 +290,27 @@
         </el-button>
       </div>
     </el-dialog>
+    <div class="block">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage4"
+        :page-sizes="[13]"
+        :page-size="100"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="paging.total"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
-import { fetchPv, createArticle, updateArticle } from "@/api/article";
+import { fetchPv } from "@/api/article";
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
-import { getData } from "./api";
+import { getData } from "./Controller";
 // 这里选择班级
 const calendarTypeOptions = [
   { key: "CN", display_name: "一班" },
@@ -424,18 +434,18 @@ export default {
       value: "老师",
       tableKey: 0,
       subject: "",
+      code: "",
+      currentPage4: 1,
+      paging: {},
       // 模拟数据
       list: [],
       total: 0,
       listLoading: false,
       // from表单或输入框默认显示值
       listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: "+id",
+        keyword: "",
+        grade: "",
+        class: "",
       },
       currentHeight: 500,
       // 选择年级
@@ -449,7 +459,6 @@ export default {
       showReviewer: false,
       // 添加老师
       temp: {
-        id: 4,
         real_name: "",
         grade: "",
         class: "",
@@ -460,7 +469,7 @@ export default {
         subjext: "",
         username: "",
         password: "",
-        timestamp: new Date(),
+        group_id: "",
       },
       dialogFormVisible: false,
       dialogStatus: "",
@@ -475,24 +484,25 @@ export default {
         mobile: [{ validator: checkAge2, trigger: "blur" }],
         username: [{ validator: validatePass2, trigger: "blur" }],
         password: [{ validator: validatePass4, trigger: "blur" }],
-        subjext: [{ validator: validatePass5, trigger: "blur" }],
+        group_id: [{ validator: validatePass5, trigger: "blur" }],
         grade: [{ validator: validatePass7, trigger: "blur" }],
         class: [{ validator: validatePass6, trigger: "blur" }],
         sex: [{ validator: validatePass8, trigger: "blur" }],
-        subjext: [{ validator: validatePass9, trigger: "blur" }],
+        subject: [{ validator: validatePass9, trigger: "blur" }],
       },
       downloadLoading: false,
     };
   },
   created() {
     // 进入页面获取数据
-    getData("ListMsg", this);
+    getData("List", this,1);
     getData("Class", this);
+    getData("Id", this);
   },
   methods: {
     //  点击搜索获取表单数据,发送请求搜索
     handleFilter() {
-      console.log(this.$data.listQuery, "121343");
+      getData("search", this, this.$data.listQuery);
     },
     handleModifyStatus(row, status) {
       this.$message({
@@ -500,6 +510,13 @@ export default {
         type: "success",
       });
       row.status = status;
+    },
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      // 获取分页数据
+      getData("List", this, val);
     },
     sortChange(data) {
       const { prop, order } = data;
@@ -518,18 +535,12 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        importance: 1,
-        remark: "",
-        timestamp: new Date(),
-        title: "",
-        status: "published",
-        type: "",
       };
     },
     handleCreate() {
       this.resetTemp();
       this.dialogStatus = "create";
-      // this.dialogFormVisible = true;
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
       });
@@ -537,54 +548,55 @@ export default {
     createData() {
       this.$refs["dataForm"].validate((valid) => {
         // valid判断是否验证通过
+
         if (valid) {
           // 这里发送请求添加老师数据
           // 需要使用自定义方法
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp);
-            // this.dialogFormVisible = false;
-            this.$notify({
-              title: "成功",
-              message: "创建成功",
-              type: "success",
-              duration: 2000,
-            });
-          });
+          let data = this.$data.temp;
+          getData("Add", this, data);
+          //  判断是否添加成功
+          // -1失败，其他成功
+          if (this.$data.code == 1) {
+            setTimeout(() => {
+              // 刷新页面
+              getData("ListMsg", this);
+              this.open2("添加成功");
+              this.$data.dialogFormVisible = false;
+            }, 100);
+          } else {
+            this.open("账号已存在");
+          }
         }
       });
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row); // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp);
+      this.temp = Object.assign({}, row);
       this.dialogStatus = "update";
       this.dialogFormVisible = true;
-      this.$nextTick(() => {
-        this.$refs["dataForm"].clearValidate();
-      });
     },
     // 在这里更新数据
     updateData() {
       this.$refs["dataForm"].validate((valid) => {
         // 验证是否通过
         if (valid) {
-          const tempData = Object.assign({}, this.temp);
-          console.log(this.temp, "编辑或更新");
-          tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            const index = this.list.findIndex((v) => v.id === this.temp.id);
-            this.list.splice(index, 1, this.temp);
-            this.dialogFormVisible = false;
-            this.$notify({
-              title: "成功",
-              message: "更新成功",
-              type: "success",
-              duration: 2000,
-            });
-          });
+          // const tempData = Object.assign({}, this.temp);
+          getData("update", this, this.temp);
+          if (this.$data.code == 1) {
+            setTimeout(() => {
+              // 刷新页面
+              getData("ListMsg", this);
+              this.open2("修改成功");
+              this.$data.dialogFormVisible = false;
+            }, 100);
+          } else {
+            this.open("修改失败");
+          }
         }
       });
     },
+    // 这里删除数据
     handleDelete(row, index) {
+      getData("del", this, row.user_id);
       this.$notify({
         title: "成功",
         message: "删除成功",
@@ -594,30 +606,30 @@ export default {
       this.list.splice(index, 1);
     },
     handleFetchPv(pv) {
-      // fetchPv(pv).then((response) => {
-      //   this.pvData = response.data.pvData;
-      //   this.dialogPvVisible = true;
-      // });
+      fetchPv(pv).then((response) => {
+        this.pvData = response.data.pvData;
+        this.dialogPvVisible = true;
+      });
     },
     handleDownload() {
-      // this.downloadLoading = true;
-      // import("@/vendor/Export2Excel").then((excel) => {
-      //   const tHeader = ["timestamp", "title", "type", "importance", "status"];
-      //   const filterVal = [
-      //     "timestamp",
-      //     "title",
-      //     "type",
-      //     "importance",
-      //     "status",
-      //   ];
-      //   const data = this.formatJson(filterVal);
-      //   excel.export_json_to_excel({
-      //     header: tHeader,
-      //     data,
-      //     filename: "table-list",
-      //   });
-      //   this.downloadLoading = false;
-      // });
+      this.downloadLoading = true;
+      import("@/vendor/Export2Excel").then((excel) => {
+        const tHeader = ["timestamp", "title", "type", "importance", "status"];
+        const filterVal = [
+          "timestamp",
+          "title",
+          "type",
+          "importance",
+          "status",
+        ];
+        const data = this.formatJson(filterVal);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: "table-list",
+        });
+        this.downloadLoading = false;
+      });
     },
     formatJson(filterVal) {
       return this.list.map((v) =>
@@ -634,6 +646,18 @@ export default {
       const sort = this.listQuery.sort;
       return sort === `+${key}` ? "ascending" : "descending";
     },
+    open2(value) {
+      this.$message({
+        message: value,
+        type: "success",
+      });
+    },
+    open(value) {
+      this.$message({
+        message: value,
+        type: "warning",
+      });
+    },
   },
 };
 </script>
@@ -644,12 +668,14 @@ export default {
   align-items: center;
   margin: auto;
   justify-content: center;
-  /* background: red; */
 }
 .now-wrap div {
   margin-left: 10px;
 }
 .head {
   display: flex;
+}
+.block {
+  padding-top: 20px;
 }
 </style>
