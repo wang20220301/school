@@ -3,17 +3,14 @@
     <div class="head">
       <div class="filter-container">
         <el-input
-          v-model="listQuery.title"
-          :placeholder="$t('输入电话或姓名')"
+          placeholder="$t('输入电话或姓名')"
           style="width: 200px"
           class="filter-item"
-          @keyup.enter.native="handleFilter"
         />
         <el-select
-          v-model="listQuery.importance"
-          :placeholder="$t('请选择年级')"
+          placeholder="$t('请选择年级')"
           clearable
-          style="width: 90px"
+          style="width: 140px"
           class="filter-item"
         >
           <el-option
@@ -24,8 +21,7 @@
           />
         </el-select>
         <el-select
-          v-model="listQuery.type"
-          :placeholder="$t('请选择班级')"
+          placeholder="$t('请选择班级')"
           clearable
           class="filter-item"
           style="width: 130px"
@@ -44,7 +40,7 @@
           icon="el-icon-search"
           @click="handleFilter"
         >
-          {{ $t("table.search") }}
+          {{ $t("搜索") }}
         </el-button>
         <el-button
           class="filter-item"
@@ -53,7 +49,7 @@
           icon="el-icon-edit"
           @click="handleCreate"
         >
-          {{ $t("table.add") }}
+          {{ $t("添加老师") }}
         </el-button>
         <el-button
           v-waves
@@ -63,7 +59,7 @@
           icon="el-icon-download"
           @click="handleDownload"
         >
-          {{ $t("table.export") }}
+          {{ $t("下载老师名册") }}
         </el-button>
       </div>
       <div style="margin-left: 20px">
@@ -115,7 +111,11 @@
           <span>{{ row.sex }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('学科')" width="110px" align="center">
+      <el-table-column
+        :label="$t('学科')"
+        width="110px"
+        align="center"
+      >
         <template slot-scope="{ row }">
           <span style="color: red">{{ row.subject }}</span>
         </template>
@@ -337,7 +337,7 @@ export default {
       return calendarTypeKeyValue[type];
     },
   },
-
+  
   data() {
     // 验证用户名不能为空,用户名不能超过6个字符
     let validatePass = (rule, value, callback) => {
@@ -431,7 +431,7 @@ export default {
       tableKey: 0,
       subject: "",
       code: "",
-      block: true,
+      block:true,
       currentPage4: 1,
       paging: {},
       // 模拟数据
@@ -492,15 +492,15 @@ export default {
   },
   created() {
     // 进入页面获取数据
-    getData("List", this, 1);
+    getData("List", this,1);
     getData("Class", this);
-    // getData("Id", this);
+    getData("Id", this);
   },
   methods: {
     //  点击搜索获取表单数据,发送请求搜索
-
+    
     handleFilter() {
-      this.$data.block = false;
+        this.$data.block=false
       getData("search", this, this.$data.listQuery);
     },
     handleModifyStatus(row, status) {
@@ -551,6 +551,7 @@ export default {
         if (valid) {
           // 这里发送请求添加老师数据
           // 需要使用自定义方法
+          console.log("1211221212121")
           let data = this.$data.temp;
           getData("Add", this, data);
           //  判断是否添加成功

@@ -157,10 +157,30 @@ export const asyncRoutes = [
         meta: { title: 'device', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] }
       },
       {
+        path: 'PublicDevice',
+        component: () => import('@/views/device-management/device'),
+        name: 'deviceDevice',
+        meta: { title: 'deviceDevice', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+      },
+      {
         path: 'deviceWarning',
         component: () => import('@/views/device-management/deviceWarning'),
         name: 'deviceWarning',
         meta: { title: 'deviceWarning', icon: 'el-icon-warning-outline', roles: ['admin', 'OMPadmin', 'school'] }
+      },
+      {
+        path: 'details',
+        component: () => import('@/views/device-management/details'),
+        name: 'details',
+        meta: { title: 'details', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+        hidden: true
+      },
+      {
+        path: 'state',
+        component: () => import('@/views/device-management/state'),
+        name: 'state',
+        meta: { title: 'state', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+        hidden: true
       }
     ]
   },

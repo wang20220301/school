@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+// import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
@@ -46,7 +46,6 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
-    // if the custom code is not 20000, it is judged as an error.
     if (res.err_code !== 1) {
       if(res.err_msg=="登陆密码错误"||res.err_msg=="用户名不存在")
       Message({
@@ -55,7 +54,6 @@ service.interceptors.response.use(
         duration: 5 * 1000
       })
       if (res.err_code == -2) {
-        // to re-login
         MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
           confirmButtonText: 'Re-Login',
           cancelButtonText: 'Cancel',

@@ -5,16 +5,17 @@ import request from '@/utils/request'
     console.log(type,"打印他的类型")
   let obj={
       add:"/add",
-      list:"/student_list",
-      updata:"/update_students",
-      del:"/del_students",
-      search:"/search_students",
-      loa:"/teacher_export",
+      list:"/show_monitor",
+      updata:"/monitor_modify",
+      del:"/del_monitors",
+      search:"/select_monitor",
       import:"/teacher_import",
-      class:"/show_class",
-      load:"/teacher_export",
+      details:"/monitor_detail",
+      control:"/monitor_control",
+      box:"/get_monitor_kind"
+      
   }
-  let url=`/api/student${obj[type]}`
+  let url=`/api/monitor${obj[type]}`
   console.log(url,"值为")
   return request({
     url,
