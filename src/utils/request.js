@@ -5,7 +5,7 @@ import store from '@/store'
 
 // create an axios instance
 const service = axios.create({
-  baseURL:'https://school.bi-et.com' , // url = base url + request url
+  baseURL: 'https://school.bi-et.com', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
@@ -19,7 +19,7 @@ service.interceptors.request.use(
     //   // let each request carry token
     //   // ['X-Token'] is a custom headers key
     //   // please modify it according to the actual situation
-      // config.headers['X-Token'] = getToken()
+    // config.headers['X-Token'] = getToken()
     // }
     //  config.header[{"Access-Control-Allow-Origin": "*"}];
     return config
@@ -43,26 +43,22 @@ service.interceptors.response.use(
    * Here is just an example
    * You can also judge the status by HTTP Status Code
    */
+
   response => {
     const res = response.data
-
     if (res.err_code !== 1) {
-      if(res.err_msg=="登陆密码错误"||res.err_msg=="用户名不存在")
-      Message({
-        message: res.message || '用户名或密码错误',
-        type: 'error',
-        duration: 5 * 1000
-      })
       if (res.err_code == -2) {
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+        MessageBox.confirm('登录过期请重新登录', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           store.dispatch('user/resetToken').then(() => {
             location.reload()
           })
         })
+      }else{
+        prompt(res.err_msg)
       }
       return Promise.reject(new Error(res.message || 'Error'))
     } else {
@@ -70,7 +66,6 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
     Message({
       message: error.message,
       type: 'error',
@@ -79,5 +74,11 @@ service.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
+let prompt = (value) => {
+  Message({
+    message: value,
+    type: 'error',
+    duration: 5 * 1000
+  })
+}
 export default service

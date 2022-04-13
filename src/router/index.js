@@ -157,10 +157,10 @@ export const asyncRoutes = [
         meta: { title: 'device', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] }
       },
       {
-        path: 'PublicDevice',
-        component: () => import('@/views/device-management/device'),
-        name: 'deviceDevice',
-        meta: { title: 'deviceDevice', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+        path: 'public',
+        component: () => import('@/views/device-management/public'),
+        name: 'public',
+        meta: { title: 'public', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
       },
       {
         path: 'deviceWarning',
@@ -170,16 +170,30 @@ export const asyncRoutes = [
       },
       {
         path: 'details',
-        component: () => import('@/views/device-management/details'),
+        component: () => import('@/views/device-management/device/details'),
         name: 'details',
         meta: { title: 'details', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
         hidden: true
       },
       {
         path: 'state',
-        component: () => import('@/views/device-management/state'),
+        component: () => import('@/views/device-management/device/state'),
         name: 'state',
         meta: { title: 'state', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+        hidden: true
+      },
+      {
+        path: 'publicDetails',
+        component: () => import('@/views/device-management/public/details'),
+        name: 'publicDetails',
+        meta: { title: 'publicDetails', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
+        hidden: true
+      },
+      {
+        path: 'publicState',
+        component: () => import('@/views/device-management/public/state'),
+        name: 'publicState',
+        meta: { title: 'publicState', icon: 'el-icon-s-operation', roles: ['admin', 'OMPadmin', 'school', 'teacher'] },
         hidden: true
       }
     ]
@@ -206,11 +220,11 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'monitor',
-        component: () => import('@/views/system-management/monitor'),
-        name: 'monitor',
+        path: 'abnormal',
+        component: () => import('@/views/system-management/abnormal'),
+        name: 'abnormal',
         meta: {
-          title: 'monitor',
+          title: 'abnormal',
           icon: 'el-icon-aim',
           roles: ['admin']
         }
@@ -221,6 +235,16 @@ export const asyncRoutes = [
         name: 'operation-log',
         meta: {
           title: 'operationLog',
+          icon: 'el-icon-news',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'time-management',
+        component: () => import('@/views/system-management/time'),
+        name: 'time-management',
+        meta: {
+          title: 'timeManagement',
           icon: 'el-icon-news',
           roles: ['admin']
         }

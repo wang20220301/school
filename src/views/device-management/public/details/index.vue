@@ -1,15 +1,44 @@
 <template>
   <div class="content">
-    <div class="block"></div>
+    <div  class="block"></div>
     <div class="menu">
       <div class="box" @click="click1()">设备信息</div>
       <div class="box1" @click="click()">柜机状态</div>
     </div>
     <div class="form">
-      <div class="list">
-        <p class="listp" v-for="(item, index) in list" :key="index">
-          {{ item }}
-        </p>
+      <div>
+        <el-form
+          :model="ruleForm"
+          status-icon
+          :rules="rules"
+          ref="ruleForm"
+          label-width="100px"
+          class="demo-ruleForm"
+        >
+          <el-form-item label="密码" prop="pass">
+            <el-input
+              type="password"
+              v-model="ruleForm.pass"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="确认密码" prop="checkPass">
+            <el-input
+              type="password"
+              v-model="ruleForm.checkPass"
+              autocomplete="off"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="年龄" prop="age">
+            <el-input v-model.number="ruleForm.age"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm('ruleForm')"
+              >提交</el-button
+            >
+            <el-button @click="resetForm('ruleForm')">重置</el-button>
+          </el-form-item>
+        </el-form>
       </div>
     </div>
   </div>
@@ -54,24 +83,6 @@ export default {
       }
     };
     return {
-      list: [
-      
-        "1",
-        "2",
-        "1",
-        "2",
-        "1",
-        "2",
-        "2",
-        "1",
-        "2",
-        "2",
-        "1",
-        "2",
-        "2",
-        "1",
-        "2",
-      ],
       ruleForm: {
         pass: "",
         checkPass: "",
@@ -104,12 +115,13 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
-    click() {
-      this.$router.push("/device-management/state");
+    click(){
+      console.log("成功执行公共柜")
+      this.$router.push("/device-management/publicState")
     },
-    click1() {
-      this.$router.push("/device-management/details");
-    },
+    click1(){
+        this.$router.push("/device-management/publicDetails")
+    }
   },
 };
 </script>
@@ -117,10 +129,10 @@ export default {
 <style scoped>
 .content {
   height: calc(100vh - 5.9vh);
-  background: hsla(216, 17%, 94%, 1);
+  background:hsla(216, 17%, 94%, 1);
 }
-.block {
-  padding-top: 20px;
+.block{
+    padding-top: 20px;
 }
 .menu {
   margin-left: 20px;
@@ -130,8 +142,8 @@ export default {
   background: #fff;
   display: flex;
 }
-.box1 {
-  border-bottom: 3px hsla(210, 100%, 63%, 1) solid;
+.box{
+    border-bottom: 3px  hsla(210, 100%, 63%, 1) solid  ;
 }
 .box,
 .box1 {
@@ -149,32 +161,5 @@ export default {
   align-items: center;
   justify-content: center;
   background: #fff;
-}
-.list {
-  /* height: 500px;
-  width: 800px;
-  display: flex;
-  flex-wrap: wrap; */
-  width: 800px;
-  height: 500px;
-  display: flex;
-  /* flex-direction: row; */
-  flex-wrap: wrap;
-  align-content: flex-end;
-  /* align-content: space-between; */
-  
-  
-}
-.listp {
-  width: 100px;
-  height: 32px;
-  /* display: flex;
-  align-items: center;
-  justify-content: center; */
-  margin-right: 20px;
-  border: 1px dashed red;
-  box-sizing: border-box;
-  background: rgba(0, 0, 0, 0.12);
-  /* align-content: flex-end; */
 }
 </style>

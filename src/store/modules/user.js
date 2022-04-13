@@ -75,6 +75,7 @@ const actions = {
   // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
+     
       logout(state.token).then(() => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
@@ -87,6 +88,7 @@ const actions = {
 
         resolve()
       }).catch(error => {
+        console.log("错误信息")
         reject(error)
       })
     })
